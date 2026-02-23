@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minecraft Embedded</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background-color: #1b1b1b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      cursor: default;
+      color: white;
+    }
+
+    .container {
+      position: relative;
+      width: 90vw;
+      height: 90vh;
+      border: 2px solid white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: black;
+      cursor: default;
+    }
+
+    .pointer-locked {
+      cursor: none;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 16px;
+      display: block;
+      /* Remove pointer-events:none so iframe can receive input */
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="container">
+    <iframe
+      id="gameframe"
+      src="https://eaglercraft.com/mc/1.12.2-wasm/"
+      title="Minecraft Embed"
+      sandbox="allow-scripts allow-same-origin allow-forms"
+    ></iframe>
+  </div>
+
+  <script>
+    const container = document.getElementById('container');
+    const iframe = document.getElementById('gameframe');
+
+    // Request fullscreen on page load
+    window.onload = () => {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen();
+      } else if (document.documentElement.webkitRequestFullscreen) {
+        document.documentElement.webkitRequestFullscreen();
+      } else if (document.documentElement.msRequestFullscreen) {
+        document.documentElement.msRequestFullscreen();
+      }
+    };
+
+    // Request pointer lock on iframe on left click inside container or iframe
+    function requestPointerLock() {
+      if (
+        document.pointerLockElement !== container &&
+        document.mozPointerLockElement !== container &&
+        document.webkitPointerLockElement !== container
+      ) {
+        container.requestPointerLock = container.requestPointerLock ||
+          container.mozRequestPointerLock ||
+          container.webkitRequestPointerLock;
+        container.requestPointerLock();
+      }
+    }
+
+    container.addEventListener('click', (e) => {
+      if (e.button === 0) {
+        requestPointerLock();
+      }
+    });
+
+    iframe.addEventListener('click', (e) => {
+      if (e.button === 0) {
+        requestPointerLock();
+      }
+    });
+
+    // Pointer lock change event to toggle cursor hiding
+    function pointerLockChange() {
+      if (
+        document.pointerLockElement === container ||
+        document.mozPointerLockElement === container ||
+        document.webkitPointerLockElement === container
+      ) {
+        container.classList.add('pointer-locked');
+        console.log('Pointer locked');
+      } else {
+        container.classList.remove('pointer-locked');
+        console.log('Pointer unlocked');
+      }
+    }
+
+    document.addEventListener('pointerlockchange', pointerLockChange, false);
+    document.addEventListener('mozpointerlockchange', pointerLockChange, false);
+    document.addEventListener('webkitpointerlockchange', pointerLockChange, false);
+
+    // Normal ESC behavior exits fullscreen and pointer lock
+  </script>
+</body>
+</html>
